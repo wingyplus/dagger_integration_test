@@ -118,12 +118,75 @@ defmodule Dagger.ModuleFunctionTest do
            """
   end
 
-  defp query(mod, q) do
-    assert {:ok, output} =
-             mod
-             |> dagger_query(q)
-             |> stdout()
+  test "optional argument", %{dag: dag} do
+    mod =
+      dag
+      |> dagger_cli_base()
+      |> dagger_init()
+      |> dagger_with_source("test/lib/test.ex", """
+      defmodule Test do
+        use Dagger.Mod.Object, name: "Test"
 
-    output
+        defn hello(name: String.t() | nil) :: String.t() do
+          if is_nil(name) do
+            "Please give me a name. 😊"
+          else
+            "Hello, \#{name}"
+          end
+        end
+      end
+      """)
+
+    assert query(mod, """
+           {
+             test {
+               hello(name: "john")
+             }
+           }
+           """) == """
+           {
+               "test": {
+                   "hello": "Hello, john"
+               }
+           }
+           """
+
+    assert query(mod, """
+           {
+             test {
+               hello(name: null)
+             }
+           }
+           """) == """
+           {
+               "test": {
+                   "hello": "Please give me a name. 😊"
+               }
+           }
+           """
+
+    assert query(mod, """
+           {
+             test {
+               hello
+             }
+           }
+           """) == """
+           {
+               "test": {
+                   "hello": "Please give me a name. 😊"
+               }
+           }
+           """
+  end
+
+  defp query(mod, q) do
+    mod
+    |> dagger_query(q)
+    |> stdout()
+    |> case do
+      {:ok, output} -> output
+      {:error, exception} -> raise exception
+    end
   end
 end

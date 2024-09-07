@@ -1,5 +1,5 @@
 %{
-  "dagger": {:hex, :dagger, "0.12.5", "f80fee22a8f6a3dae81d10c0d13b15eb9d0a6cca46ed9861f513fcbc2f1ce6ab", [:mix], [{:jason, "~> 1.4", [hex: :jason, repo: "hexpm", optional: false]}, {:nimble_options, "~> 1.0", [hex: :nimble_options, repo: "hexpm", optional: false]}], "hexpm", "50a66b425e90f79543ec23fe3bf884f73ebfc506e221b20bea4ed1e432aad192"},
+  "dagger": {:hex, :dagger, "0.12.7", "626880bb922b6e958671c351a87b426e0faf32ee28dc0a1af3589f4e7888b7e3", [:mix], [{:jason, "~> 1.4", [hex: :jason, repo: "hexpm", optional: false]}, {:nimble_options, "~> 1.0", [hex: :nimble_options, repo: "hexpm", optional: false]}], "hexpm", "a3fd542beb4478901b197f42689df39317d560351d5a88d9bcd963481271300f"},
   "jason": {:hex, :jason, "1.4.4", "b9226785a9aa77b6857ca22832cffa5d5011a667207eb2a0ad56adb5db443b8a", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "c5eb0cab91f094599f94d55bc63409236a8ec69a21a67814529e8d5f6cc90b3b"},
   "nimble_options": {:hex, :nimble_options, "1.1.1", "e3a492d54d85fc3fd7c5baf411d9d2852922f66e69476317787a7b2bb000a61b", [:mix], [], "hexpm", "821b2470ca9442c4b6984882fe9bb0389371b8ddec4d45a9504f00a66f650b44"},
 }
