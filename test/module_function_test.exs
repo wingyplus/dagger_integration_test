@@ -1,5 +1,6 @@
 defmodule Dagger.ModuleFunctionTest do
   use Dagger.Case, async: true
+  use Mneme
 
   import Dagger.TestHelper
 
@@ -22,62 +23,73 @@ defmodule Dagger.ModuleFunctionTest do
       end
       """)
 
-    assert query(mod, """
-           {
-             test {
-               hello
-             }
-           }
-           """) ==
-             """
-             {
-                 "test": {
-                     "hello": "hello"
-                 }
-             }
-             """
+    auto_assert(
+      """
+      {
+          "test": {
+              "hello": "hello"
+          }
+      }
+      """ <-
+        query(mod, """
+        {
+          test {
+            hello
+          }
+        }
+        """)
+    )
 
-    assert query(mod, """
-           {
-             test {
-               echo(msg: "world")
-             }
-           }
-           """) == """
-           {
-               "test": {
-                   "echo": "world"
-               }
-           }
-           """
+    auto_assert(
+      """
+      {
+          "test": {
+              "echo": "world"
+          }
+      }
+      """ <-
+        query(mod, """
+        {
+          test {
+            echo(msg: "world")
+          }
+        }
+        """)
+    )
 
-    assert query(mod, """
-           {
-             test {
-               echoList(msg: ["a", "b", "c"])
-             }
-           }
-           """) == """
-           {
-               "test": {
-                   "echoList": "a+b+c"
-               }
-           }
-           """
+    auto_assert(
+      """
+      {
+          "test": {
+              "echoList": "a+b+c"
+          }
+      }
+      """ <-
+        query(mod, """
+        {
+          test {
+            echoList(msg: ["a", "b", "c"])
+          }
+        }
+        """)
+    )
 
-    assert query(mod, """
-           {
-             test {
-               echoList2(msg: ["a", "b", "c"])
-             }
-           }
-           """) == """
-           {
-               "test": {
-                   "echoList2": "a+b+c"
-               }
-           }
-           """
+    auto_assert(
+      """
+      {
+          "test": {
+              "echoList2": "a+b+c"
+          }
+      }
+      """ <-
+        query(mod, """
+        {
+          test {
+            echoList2(msg: ["a", "b", "c"])
+          }
+        }
+        """)
+    )
   end
 
   test "signatures builtin types", %{dag: dag} do
@@ -103,19 +115,22 @@ defmodule Dagger.ModuleFunctionTest do
              |> Dagger.Directory.with_new_file("foo", "bar")
              |> Dagger.Directory.id()
 
-    assert query(mod, """
-           {
-             test {
-               read(dir: "#{dir_id}")
-             }
-           }
-           """) == """
-           {
-               "test": {
-                   "read": "bar"
-               }
-           }
-           """
+    auto_assert(
+      """
+      {
+          "test": {
+              "read": "bar"
+          }
+      }
+      """ <-
+        query(mod, """
+        {
+          test {
+            read(dir: "#{dir_id}")
+          }
+        }
+        """)
+    )
   end
 
   test "optional argument", %{dag: dag} do
@@ -137,47 +152,125 @@ defmodule Dagger.ModuleFunctionTest do
       end
       """)
 
-    assert query(mod, """
-           {
-             test {
-               hello(name: "john")
-             }
-           }
-           """) == """
-           {
-               "test": {
-                   "hello": "Hello, john"
-               }
-           }
-           """
+    auto_assert(
+      """
+      {
+          "test": {
+              "hello": "Hello, john"
+          }
+      }
+      """ <-
+        query(mod, """
+        {
+          test {
+            hello(name: "john")
+          }
+        }
+        """)
+    )
 
-    assert query(mod, """
-           {
-             test {
-               hello(name: null)
-             }
-           }
-           """) == """
-           {
-               "test": {
-                   "hello": "Please give me a name. 😊"
-               }
-           }
-           """
+    auto_assert(
+      """
+      {
+          "test": {
+              "hello": "Please give me a name. 😊"
+          }
+      }
+      """ <-
+        query(mod, """
+        {
+          test {
+            hello(name: null)
+          }
+        }
+        """)
+    )
 
-    assert query(mod, """
-           {
-             test {
-               hello
-             }
-           }
-           """) == """
-           {
-               "test": {
-                   "hello": "Please give me a name. 😊"
-               }
-           }
-           """
+    auto_assert(
+      """
+      {
+          "test": {
+              "hello": "Please give me a name. 😊"
+          }
+      }
+      """ <-
+        query(mod, """
+        {
+          test {
+            hello
+          }
+        }
+        """)
+    )
+  end
+
+  test "context directory", %{dag: dag} do
+    mod =
+      dag
+      |> dagger_cli_base()
+      |> dagger_init()
+      |> dagger_with_source("test/lib/test.ex", """
+      defmodule Test do
+        use Dagger.Mod.Object, name: "Test"
+
+        defn entries(dir: {Dagger.Directory.t() | nil, default_path: "/", ignore: ["dagger_sdk"]}) :: [String.t()] do
+          dir
+          |> Dagger.Directory.entries()
+        end
+
+        defn entries_no_ignore(dir: {Dagger.Directory.t() | nil, default_path: "/"}) :: [String.t()] do
+          dir
+          |> Dagger.Directory.entries()
+        end
+      end
+      """)
+
+    auto_assert(
+      """
+      {
+          "test": {
+              "entries": [
+                  ".gitattributes",
+                  ".gitignore",
+                  "LICENSE",
+                  "dagger.json",
+                  "test"
+              ]
+          }
+      }
+      """ <-
+        query(mod, """
+        {
+          test {
+            entries
+          }
+        }
+        """)
+    )
+
+    auto_assert(
+      """
+      {
+          "test": {
+              "entriesNoIgnore": [
+                  ".gitattributes",
+                  ".gitignore",
+                  "LICENSE",
+                  "dagger.json",
+                  "dagger_sdk",
+                  "test"
+              ]
+          }
+      }
+      """ <-
+        query(mod, """
+        {
+          test {
+            entriesNoIgnore
+          }
+        }
+        """)
+    )
   end
 
   defp query(mod, q) do

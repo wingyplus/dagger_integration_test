@@ -23,7 +23,8 @@ defmodule DaggerIntegrationTest.MixProject do
 
   defp deps do
     [
-      {:dagger, "~> 0.12"}
+      {:dagger, "~> 0.12"},
+      {:mneme, "~> 0.9.0-alpha.1"}
     ]
   end
 end
